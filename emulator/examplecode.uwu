@@ -1,0 +1,43 @@
+
+section apagnan 2000
+section skibidi 2002
+
+section quoicou 2008
+
+preprocessor will replace all instances of apagnan with 2000, skibidi 2002, etc etc
+
+
+
+func my_function 3
+arg 2; reads memory at STACKPOINTER + 2 (because sp decreases when stack increases) and puts it into x
+lda 0
+
+;read from address, store in X
+rex #hw		<- preproc replaces '#hw' with the rom address hw points to
+
+ldd #hw;	loads the rom address 'hw' into D
+read;	fetch memory at D and put into X
+incd;	increase D
+decd;	decrease D
+
+
+save 1234;	stores in lsb the value in D at 1234
+restore 1234; reads value in lsb at 1234 to put into D
+
+save quoicou
+restore quoicou
+
+ret
+
+
+leap 9	//moves the PC 9 bytes later to skip instructions, if flag a == 0
+
+
+.init
+
+
+
+
+
+.data
+hw:"HelloWorld"

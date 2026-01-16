@@ -6,6 +6,7 @@
 
 //its gonna be a 7bit console
 typedef uint8_t register_size_t;
+// 14bit address
 typedef uint16_t address_t;
 
 typedef struct {
@@ -19,7 +20,7 @@ typedef struct {
 
 typedef struct{
 
-	register_size_t* ram;	//holds stack from $6942 to $68C2
+	register_size_t* ram;	//holds stack from $6942 to $68C2 (no that cant happen with 14 but address :despair:)
 	register_size_t* rom;
 
 	/* should have a dedicated PPU section if i have time */
@@ -38,6 +39,7 @@ typedef struct {
 	register_size_t a;	//accumulator
 	register_size_t sp;	//stack pointer
 	address_t pc;	//program counter
+	address_t d;	//address register, all read/write use the value here as address
 
 	MemoryMap mmap;
 
@@ -54,8 +56,14 @@ typedef enum {
 } Operation;
 
 void swapXY(Processor* p);
-void arithmetic(Processor* p, Operation o);
-register_t load(Processor* p, address_t a);
-void write(Processor* p, address_t a);
+void arithmetic(Processor* p, Operation o);	//always uses A in place and X as operand (A = A + X, A = A - X, ...)
+
+//Uses D register as address
+register_t load(Processor* p);
+void write(Processor* p);
+
+//for D register
+void save(Processor*p, address_t a);
+void restore(Processor*p, address_t a);
 
 #endif
