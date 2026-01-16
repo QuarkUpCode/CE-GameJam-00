@@ -1,0 +1,39 @@
+macro CHR_DATA $1F00
+macro SPRITE_DATA $1F02
+
+macro tmp $0000
+
+macro robot_x $0002
+macro robot_y $0003
+
+
+
+.loadgraphics
+; load graphics data routine
+
+ldd #graphics;	<- for my compiler, you can just remember the indice and the length into which to replace later when you'll know where #graphics is
+save tmp;	<- here d is used exclusively as a 14-bit register
+ldd tmp;
+read;	fetch first byte (least significant)
+ldd CHR_DATA;
+write;	write first byte (least significant)
+ldd tmp;
+incd;
+read;	fetch second byte (most significant)
+ldd CHR_DATA;
+incd;
+write;	write second byte (most significant)
+
+ret;
+
+
+
+
+
+
+.init
+call loadgraphics
+
+
+.data
+graphics:%GRAPHICS

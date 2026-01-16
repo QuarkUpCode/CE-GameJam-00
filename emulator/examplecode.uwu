@@ -1,14 +1,14 @@
 
-section apagnan 2000
-section skibidi 2002
+macro apagnan 2000
+macro skibidi 2002
 
-section quoicou 2008
+macro quoicou 2008
 
 preprocessor will replace all instances of apagnan with 2000, skibidi 2002, etc etc
 
 
 
-func my_function 3
+func my_function 3	<- no i immediately discountinue this
 arg 2; reads memory at STACKPOINTER + 2 (because sp decreases when stack increases) and puts it into x
 lda 0
 
@@ -41,3 +41,4 @@ leap 9	//moves the PC 9 bytes later to skip instructions, if flag a == 0
 
 .data
 hw:"HelloWorld"
+%GRAPHICS	//preproc will replace this with the contents of the GRAPHICS file
