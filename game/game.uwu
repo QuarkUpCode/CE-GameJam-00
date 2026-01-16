@@ -1,7 +1,7 @@
 macro CHR_DATA $1F00
 macro SPRITE_DATA $1F02
 
-macro tmp $0000
+macro tmp $0E0F
 
 macro robot_x $0002
 macro robot_y $0003
@@ -32,7 +32,7 @@ ret;
 
 
 .init
-call loadgraphics
+call @loadgraphics
 
 
 .data
