@@ -7,6 +7,7 @@
 #include "loadfile.h"
 
 #include "quarklib/qprint/qprint.h"
+#include <stdio.h>
 
 
 void step(Processor* p){
@@ -22,6 +23,7 @@ void step(Processor* p){
 			readm(p);
 			break;
 		case OC_WRITE:
+			qdebug("writing %x at %x\n", p->x, p->d);
 			writem(p);
 			break;
 		case OC_SAVE:
@@ -64,7 +66,8 @@ void step(Processor* p){
 		case OC_LDX:
 			operand = 0x00;
 			p->pc++;
-			operand = *fetch(p, p->pc)&0x8F;
+			operand = (*fetch(p, p->pc))&0x7F;
+			// printf("aaa %x\n", operand);
 			p->x = operand;
 			qdebug("loaded %x into x\n", operand);
 			break;
@@ -91,12 +94,13 @@ void step(Processor* p){
 		case OC_LEAP:
 			operand = 0x00;
 			p->pc++;
-			operand = *fetch(p, p->pc)&0x8F;
-			if(((p->a)&0x8F) == 0){
+			operand = *fetch(p, p->pc)&0x7F;
+			if(((p->a)&0x7F) == 0){
 				p->pc += operand;
 				qdebug("Leaped forward %d\n", operand);
 			}
 			else qdebug("Did not leap %d\n", operand);
+			// p->pc--;
 			break;
 		case OC_CALL:
 			p->sp--;
@@ -111,6 +115,7 @@ void step(Processor* p){
 			p->d = a;
 			p->pc = a;
 			qdebug("Called %x\n", p->pc);
+			p->pc--;
 			break;
 		case OC_RET:
 			restore(p, p->sp);
@@ -118,6 +123,7 @@ void step(Processor* p){
 			p->sp++;
 			p->pc = p->d;
 			qdebug("returned to %x\n", p->pc);
+			p->pc--;	//!!! not sure
 			break;
 		case OC_ADD:
 			arithmetic(p, OP_ADD);
@@ -153,12 +159,16 @@ void step(Processor* p){
 
 void printram(Processor* p){
 	const int width = 16;
-	for(int y=0; y<(0x1EFF / width); y++){
+	const int LINES = 4;
+	qprint("----\n");
+	// for(int y=0; y<(0x1EFF / width); y++){
+	for(int y=0; y<LINES; y++){
 		for(int x=0; x<width; x++){
-			qprint("%2x", *fetch(p, 0x2000 + (width*y) + x));
+			qprint("%d ", *fetch(p, 0x0000 + (width*y) + x));
 		}
 		qprint("\n");
 	}
+	qprint("----\n");
 }
 
 void emulate(const char* rom_path){
@@ -173,14 +183,21 @@ void emulate(const char* rom_path){
 	processor.mmap.bg1 = NULL;
 	processor.mmap.col = NULL;
 
-	processor.mmap.controller = 0b00000000;
+	processor.mmap.controller = 0b00100000;
 	
 	processor.pc = 0x2000;
 	int i = 0;
-	while(1){
+	int j = 0;
+	while(j<(1+9)){
+		printf("pc : %x\n", processor.pc);
 		step(&processor);
 		printram(&processor);
-		if(i>=256) break;
+		i++;
+		// if(i>=64) break;
+		if(processor.pc == 0x2003){
+			qlog("i = %d\n", i);
+			j++;
+		}
 	}
 }
 

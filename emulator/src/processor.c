@@ -8,8 +8,10 @@ register_size_t* fetch(Processor* p, address_t a){
 	}
 
 	if((0x1F00 <= a) && (a <= 0x1FFF)){
+		qdebug("$cmfetching %x$0\n");
 		switch(a){
 			case 0x1FFF:
+				qlog("controller value is %x\n", p->mmap.controller);
 				return &(p->mmap.controller);
 			default:
 				qerror("Unkown SPC special address %x\n", a);
@@ -69,6 +71,8 @@ void arithmetic(Processor* p, Operation o){
 		default:
 			qerror("WOOOW THATS NOT A VALID `Operation` %d\n", o);
 	}
+	p->a = p->a&0x3F;
+	qlog("a is now %x\n", p->a);
 }
 
 void readm(Processor* p){

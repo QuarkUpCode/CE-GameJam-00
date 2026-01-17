@@ -12,7 +12,7 @@ macro BT_B $02
 macro BT_START $01
 
 
-macro tmp $0E0F
+macro tmp $0000
 
 macro robot_x $0002;	address
 macro robot_y $0003;	address
@@ -54,11 +54,15 @@ read;
 swapXA;
 ldx BT_UP;
 and;			controller&button up
-not;			invert for leap
-leap %10;			3+1+2+1+1+1+1 = 10
+;not;			invert for leap
+leap %13;			3+1+2+1+1+1+1 = 10
 ldd pointer_y;
+read;
+dupeXY;
 swapXA;
-leap %1;	if y is already 0, dont decrease
+leap %3;	if y is already 0, dont decrease
+swapXY;
+swapXA;
 dec;
 swapXA;
 write;
@@ -69,11 +73,15 @@ read;
 swapXA;
 ldx BT_LEFT;
 and;			controller&button left
-not;			invert for leap
-leap %10;			3+1+2+1+1+1+1 = 10
+;not;			invert for leap
+leap %13;			3+1+2+1+1+1+1 = 10
 ldd pointer_x;
+read;
+dupeXY;
 swapXA;
-leap %1;	if x is already 0, dont decrease
+leap %3;	if x is already 0, dont decrease
+swapXY;
+swapXA;
 dec;
 swapXA;
 write;
@@ -84,13 +92,17 @@ read;
 swapXA;
 ldx BT_DOWN;
 and;			controller&button down
-not;			invert for leap
-leap %12;			3+1+2+1+2+1+1+1 = 12
+;not;			invert for leap
+leap %16;			3+1+2+1+2+1+1+1 = 12
 ldd pointer_y;
+read;
+dupeXY;
 swapXA;
 ldx MAX_Y;
 sub;
-leap %1;	if y is already MAX_Y, dont increase
+leap %3;	if y is already MAX_Y, dont increase
+swapXY;
+swapXA;
 inc;
 swapXA;
 write;
@@ -101,13 +113,17 @@ read;
 swapXA;
 ldx BT_RIGHT;
 and;			controller&button down
-not;			invert for leap
-leap %12;			3+1+2+1+2+1+1+1 = 12
+;not;			invert for leap
+leap %16;			3+1+2+1+2+1+1+1 = 12
 ldd pointer_x;
+read;
+dupeXY;
 swapXA;
 ldx MAX_X;
 sub;
-leap %1;	if x is already MAX_X, dont increase
+leap %3;	if x is already MAX_X, dont increase
+swapXY;
+swapXA;
 inc;
 swapXA;
 write;
