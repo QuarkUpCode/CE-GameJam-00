@@ -114,7 +114,7 @@ void step(Processor* p){
 			a |= ((*fetch(p, p->pc))&0x3F)<<8;
 			p->d = a;
 			p->pc = a;
-			qdebug("Called %x\n", p->pc);
+			qdebug("\n\nCalled %x\n\n", p->pc);
 			p->pc--;
 			break;
 		case OC_RET:
@@ -123,7 +123,9 @@ void step(Processor* p){
 			p->sp++;
 			p->pc = p->d;
 			qdebug("returned to %x\n", p->pc);
-			p->pc--;	//!!! not sure
+			// p->pc--;	//!!! not sure
+			p->pc++;
+			p->pc++;
 			break;
 		case OC_ADD:
 			arithmetic(p, OP_ADD);
@@ -188,7 +190,8 @@ void emulate(const char* rom_path){
 	processor.pc = 0x2000;
 	int i = 0;
 	int j = 0;
-	while(j<(1+9)){
+	while(j<(1+2)){
+	// while(1){
 		printf("pc : %x\n", processor.pc);
 		step(&processor);
 		printram(&processor);

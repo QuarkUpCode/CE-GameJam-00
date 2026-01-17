@@ -18,8 +18,16 @@ macro robot_x $0002;	address
 macro robot_y $0003;	address
 macro pointer_x $0004;	address
 macro pointer_y $0005;	address
-macro MAX_X $08;		value
-macro MAX_Y $04;		value
+macro MAX_X $07;		value
+macro MAX_Y $03;		value
+
+macro sprite_count $2;
+
+macro sprite_pointer $1000;
+;macro sprite_pointer $0008;
+macro texture_pointer $00;
+macro palette_pointer $00;
+macro sprite_robot $1004;
 
 
 .init
@@ -45,7 +53,9 @@ call @mainloop
 ;ret;
 
 
-
+;;;;;;;;;;;;;;;
+; MOVE CURSOR ;
+;;;;;;;;;;;;;;;
 .movecursor
 
 ; -- UP --
@@ -132,12 +142,66 @@ write;
 ret;
 
 
+;;;;;;;;;;;;;;;;;;
+; LOADSPRITEDATA ;
+;;;;;;;;;;;;;;;;;;
+.loadspritedata
 
+; -- load x and y position in X and Y registers --
+ldd pointer_x
+read;
+swapXY;
+ldd pointer_y;
+read;
+ldd sprite_pointer;
+swapXY;
+
+; -- convert to format (<<3)
+swapXA;
+ldx $08;
+mul;
+swapXA;
+
+swapXY;
+
+swapXA;
+ldx $08;
+mul;
+swapXA;
+
+swapXY;
+
+; -- write it to sprite_pointer (x, y)
+write;
+incd;
+swapXY;
+write;
+
+; -- write texture and palette
+incd;
+ldx texture_pointer;
+write;
+incd;
+ldx palette_pointer;
+write;
+
+
+
+ret;
+
+
+
+
+
+;;;;;;;;;;;;
+; MAINLOOP ;
+;;;;;;;;;;;;
 .mainloop
 pop;
 pop;	because i use CALL it pushes 2 bytes on stack, so this undoes that
 
 call @movecursor
+call @loadspritedata
 
 
 call @mainloop
