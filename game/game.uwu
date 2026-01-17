@@ -22,6 +22,10 @@ macro MAX_X $08;		value
 macro MAX_Y $04;		value
 
 
+.init
+call @mainloop
+
+
 ;.loadgraphics
 ;; load graphics data routine
 ;
@@ -125,9 +129,9 @@ call @mainloop
 
 
 
-.init
+;.init
 ;call @loadgraphics
-call @mainloop
+;call @mainloop
 
 ;.data
 ;graphics:%GRAPHICS

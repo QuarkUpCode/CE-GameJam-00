@@ -9,6 +9,10 @@ typedef uint8_t register_size_t;
 // 14bit address
 typedef uint16_t address_t;
 
+
+//!!!! 14-bytes addresses are stored in memory as 8bit + 6bit
+//prefer incd rather than like idk save, read, swapxa, inc, swapxy, store, restore
+
 typedef struct {
 
 	register_size_t x;	// aaaa bbb, A indicates tile, B indicates subtile 2px displacement (or simply placed at 2px * x)
