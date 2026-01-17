@@ -71,10 +71,10 @@ void arithmetic(Processor* p, Operation o){
 	}
 }
 
-void read(Processor* p){
+void readm(Processor* p){
 	p->x = *fetch(p, p->d);
 }
-void write(Processor* p){
+void writem(Processor* p){
 	*fetch(p, p->d) = p->x;
 }
 

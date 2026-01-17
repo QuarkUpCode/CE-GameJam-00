@@ -72,8 +72,8 @@ void swapXA(Processor* p);
 void arithmetic(Processor* p, Operation o);	//always uses A in place and X as operand (A = A + X, A = A - X, ...)
 
 //Uses D register as address
-void read(Processor* p);
-void write(Processor* p);
+void readm(Processor* p);
+void writem(Processor* p);
 
 //for D register
 void save(Processor*p, address_t a);

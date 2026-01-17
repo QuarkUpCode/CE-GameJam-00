@@ -19,10 +19,10 @@ void step(Processor* p){
 		case OC_NOP:
 			break;
 		case OC_READ:
-			read(p);
+			readm(p);
 			break;
 		case OC_WRITE:
-			write(p);
+			writem(p);
 			break;
 		case OC_SAVE:
 			a = 0x0000;
