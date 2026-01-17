@@ -1,5 +1,5 @@
-macro CHR_DATA $1F00
-macro SPRITE_DATA $1F02
+;macro SPC_CHR_DATA $1F00
+;macro SPC_SPRITE_DATA $1F02
 macro CONTROLLER $1FFF
 
 
@@ -23,7 +23,8 @@ macro MAX_Y $03;		value
 
 macro sprite_count $2;
 
-macro sprite_pointer $1000;
+;macro sprite_pointer $1000;
+macro sprite_pointer $1F80
 ;macro sprite_pointer $0008;
 macro texture_pointer $00;
 macro palette_pointer $00;
@@ -184,7 +185,6 @@ write;
 incd;
 ldx palette_pointer;
 write;
-
 
 
 ret;

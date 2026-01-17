@@ -176,7 +176,7 @@ void printram(Processor* p){
 void emulate(const char* rom_path){
 	uint8_t* rom = loadfile(rom_path);
 
-	Processor processor = {0, 0, 0, 0, 0, 0, (MemoryMap){0, 0, 0, 0, 0, 0, 0}};
+	Processor processor = {0, 0, 0, 0, 0, 0, (MemoryMap){0, 0, 0, 0, 0, 0, 0, 0}};
 	processor.mmap.ram = malloc(0x1EFF * sizeof(uint8_t));
 	processor.mmap.rom = rom;
 
@@ -184,6 +184,7 @@ void emulate(const char* rom_path){
 	processor.mmap.bg0 = NULL;
 	processor.mmap.bg1 = NULL;
 	processor.mmap.col = NULL;
+	processor.mmap.sprite_data = malloc(sizeof(Sprite) * MAX_SPRITE);
 
 	processor.mmap.controller = 0b00100000;
 	

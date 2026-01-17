@@ -12,7 +12,7 @@ typedef uint16_t address_t;
 
 //!!!! 14-bytes addresses are stored in memory as 8bit + 6bit
 //prefer incd rather than like idk save, read, swapxa, inc, swapxy, store, restore
-
+#define MAX_SPRITE 4
 typedef struct {
 
 	register_size_t x;	// aaaa bbb, A indicates tile, B indicates subtile 2px displacement (or simply placed at 2px * x)
@@ -33,6 +33,7 @@ typedef struct{
 	register_size_t* col;	//where the 6 color palettes will go
 	register_size_t* bg0;
 	register_size_t* bg1;
+	register_size_t* sprite_data;
 
 	register_size_t controller;
 

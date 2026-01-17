@@ -9,6 +9,9 @@ register_size_t* fetch(Processor* p, address_t a){
 
 	if((0x1F00 <= a) && (a <= 0x1FFF)){
 		qdebug("$cmfetching %x$0\n");
+		if((0x1F80 <= a) && (a <= 0x1F80 + (sizeof(Sprite) * MAX_SPRITE))){
+			return &(p->mmap.sprite_data[a-0x1F80]);
+		}
 		switch(a){
 			case 0x1FFF:
 				qlog("controller value is %x\n", p->mmap.controller);
