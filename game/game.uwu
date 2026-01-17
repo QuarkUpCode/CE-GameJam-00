@@ -1,5 +1,7 @@
 ;macro SPC_CHR_DATA $1F00
 ;macro SPC_SPRITE_DATA $1F02
+macro SPC_FORCE_RENDER $1FF0
+macro SPC_SPRITE_COUNT $1FFE
 macro CONTROLLER $1FFF
 
 
@@ -187,6 +189,11 @@ ldx palette_pointer;
 write;
 
 
+; -- tell ppu how many sprites there are
+ldx sprite_count;
+ldd SPC_SPRITE_COUNT;
+write;
+
 ret;
 
 
@@ -203,6 +210,8 @@ pop;	because i use CALL it pushes 2 bytes on stack, so this undoes that
 call @movecursor
 call @loadspritedata
 
+ldd SPC_FORCE_RENDER;
+read;
 
 call @mainloop
 

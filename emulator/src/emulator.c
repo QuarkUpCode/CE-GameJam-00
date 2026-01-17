@@ -173,10 +173,38 @@ void printram(Processor* p){
 	qprint("----\n");
 }
 
+
+uint8_t sample_texture(Processor* p, int index, int x, int y){
+	uint8_t* texture = &(p->mmap.chr[index*(TILESIZE*TILESIZE)]);
+	uint8_t c = texture[(y*TILESIZE) + x];
+	// return p->mmap.col[]
+	return c;
+}
+
+void render(Processor* p){
+	
+	int spritecount = p->mmap.spritecount;
+	Sprite s;
+	for(int i=0; i<spritecount; i++){
+		s.x = p->mmap.sprite_data[(sizeof(Sprite)*i) + 0];
+		s.y = p->mmap.sprite_data[(sizeof(Sprite)*i) + 1];
+		s.n = p->mmap.sprite_data[(sizeof(Sprite)*i) + 2];
+		s.c = p->mmap.sprite_data[(sizeof(Sprite)*i) + 3];
+		for(int dy=0; dy<TILESIZE; dy++){						//whoever is reading this i am so so sorry
+			for(int dx=0; dx<TILESIZE; dx++){
+				if((2*s.x)+dx < 0 || (TILESIZE*TILEMAP_X) <= (2*s.x)+dx || (2*s.y)+dy < 0 || (TILESIZE*TILEMAP_Y) <= (2*s.y)+dy) continue;
+				p->mmap.screen[(((2*s.y)+dy)*TILEMAP_Y*TILESIZE) + (2*s.x) + dx] = p->mmap.col[PALETTE_SIZE*s.c + sample_texture(p, s.n, dx, dy)];
+			}
+		}
+	
+	}
+}
+
 void emulate(const char* rom_path){
 	uint8_t* rom = loadfile(rom_path);
+	uint8_t* screen = malloc((TILEMAP_X*TILESIZE*TILEMAP_Y*TILESIZE)*sizeof(uint8_t)*3);
 
-	Processor processor = {0, 0, 0, 0, 0, 0, (MemoryMap){0, 0, 0, 0, 0, 0, 0, 0}};
+	Processor processor = {0, 0, 0, 0, 0, 0, (MemoryMap){0, 0, 0, 0, 0, 0, 0, 0, 0, 0}};
 	processor.mmap.ram = malloc(0x1EFF * sizeof(uint8_t));
 	processor.mmap.rom = rom;
 
@@ -187,6 +215,9 @@ void emulate(const char* rom_path){
 	processor.mmap.sprite_data = malloc(sizeof(Sprite) * MAX_SPRITE);
 
 	processor.mmap.controller = 0b00100000;
+	processor.mmap.spritecount = 0;
+
+	processor.mmap.screen = screen;
 	
 	processor.pc = 0x2000;
 	int i = 0;

@@ -9,10 +9,14 @@ typedef uint8_t register_size_t;
 // 14bit address
 typedef uint16_t address_t;
 
+#define TILESIZE 16
+#define TILEMAP_X 8
+#define TILEMAP_Y 4
 
 //!!!! 14-bytes addresses are stored in memory as 8bit + 6bit
 //prefer incd rather than like idk save, read, swapxa, inc, swapxy, store, restore
 #define MAX_SPRITE 4
+#define PALETTE_SIZE 4
 typedef struct {
 
 	register_size_t x;	// aaaa bbb, A indicates tile, B indicates subtile 2px displacement (or simply placed at 2px * x)
@@ -30,12 +34,15 @@ typedef struct{
 	/* should have a dedicated PPU section if i have time */
 
 	register_size_t* chr;	//where sprite data will go
-	register_size_t* col;	//where the 6 color palettes will go
+	uint32_t* col;	//where the 6 color palettes will go
 	register_size_t* bg0;
 	register_size_t* bg1;
 	register_size_t* sprite_data;
 
 	register_size_t controller;
+	register_size_t spritecount;
+	
+	uint8_t* screen;	//really this and some other stuff shouldn't be in there because absolutely not CPU related
 
 } MemoryMap;
 

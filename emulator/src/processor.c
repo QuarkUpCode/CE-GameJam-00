@@ -1,4 +1,5 @@
 #include "processor.h"
+#include "emulator.h"
 #include "quarklib/qprint/qprint.h"
 
 
@@ -13,6 +14,11 @@ register_size_t* fetch(Processor* p, address_t a){
 			return &(p->mmap.sprite_data[a-0x1F80]);
 		}
 		switch(a){
+			case 0x1FF0:
+				render(p);
+				break;
+			case 0x1FFE:
+				return &(p->mmap.spritecount);
 			case 0x1FFF:
 				qlog("controller value is %x\n", p->mmap.controller);
 				return &(p->mmap.controller);
