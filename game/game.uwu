@@ -1,39 +1,133 @@
 macro CHR_DATA $1F00
 macro SPRITE_DATA $1F02
+macro CONTROLLER $1FFF
+
+
+macro BT_UP $40
+macro BT_DOWN $20
+macro BT_LEFT $10
+macro BT_RIGHT $08
+macro BT_A $04
+macro BT_B $02
+macro BT_START $01
+
 
 macro tmp $0E0F
 
-macro robot_x $0002
-macro robot_y $0003
+macro robot_x $0002;	address
+macro robot_y $0003;	address
+macro pointer_x $0004;	address
+macro pointer_y $0005;	address
+macro MAX_X $08;		value
+macro MAX_Y $04;		value
+
+
+;.loadgraphics
+;; load graphics data routine
+;
+;ldd #graphics;	<- for my compiler, you can just remember the indice and the length into which to replace later when you'll know where #graphics is
+;save tmp;	<- here d is used exclusively as a 14-bit register
+;ldd tmp;
+;read;	fetch first byte (least significant)
+;ldd CHR_DATA;
+;write;	write first byte (least significant)
+;ldd tmp;
+;incd;
+;read;	fetch second byte (most significant)
+;ldd CHR_DATA;
+;incd;
+;write;	write second byte (most significant)
+;
+;ret;
 
 
 
-.loadgraphics
-; load graphics data routine
+.movecursor
 
-ldd #graphics;	<- for my compiler, you can just remember the indice and the length into which to replace later when you'll know where #graphics is
-save tmp;	<- here d is used exclusively as a 14-bit register
-ldd tmp;
-read;	fetch first byte (least significant)
-ldd CHR_DATA;
-write;	write first byte (least significant)
-ldd tmp;
-incd;
-read;	fetch second byte (most significant)
-ldd CHR_DATA;
-incd;
-write;	write second byte (most significant)
+; -- UP --
+ldd CONTROLLER;	read controller
+read;
+swapXA;
+ldx BT_UP;
+and;			controller&button up
+not;			invert for leap
+leap %10;			3+1+2+1+1+1+1 = 10
+ldd pointer_y;
+swapXA;
+leap %1;	if y is already 0, dont decrease
+dec;
+swapXA;
+write;
+
+; -- LEFT --
+ldd CONTROLLER;	read controller
+read;
+swapXA;
+ldx BT_LEFT;
+and;			controller&button left
+not;			invert for leap
+leap %10;			3+1+2+1+1+1+1 = 10
+ldd pointer_x;
+swapXA;
+leap %1;	if x is already 0, dont decrease
+dec;
+swapXA;
+write;
+
+; -- DOWN --
+ldd CONTROLLER;	read controller
+read;
+swapXA;
+ldx BT_DOWN;
+and;			controller&button down
+not;			invert for leap
+leap %12;			3+1+2+1+2+1+1+1 = 12
+ldd pointer_y;
+swapXA;
+ldx MAX_Y;
+sub;
+leap %1;	if y is already MAX_Y, dont increase
+inc;
+swapXA;
+write;
+
+; -- RIGHT --
+ldd CONTROLLER;	read controller
+read;
+swapXA;
+ldx BT_RIGHT;
+and;			controller&button down
+not;			invert for leap
+leap %12;			3+1+2+1+2+1+1+1 = 12
+ldd pointer_x;
+swapXA;
+ldx MAX_X;
+sub;
+leap %1;	if x is already MAX_X, dont increase
+inc;
+swapXA;
+write;
+
 
 ret;
 
 
 
+.mainloop
+pop;
+pop;	because i use CALL it pushes 2 bytes on stack, so this undoes that
+
+call @movecursor
+
+
+call @mainloop
+
 
 
 
 .init
-call @loadgraphics
+;call @loadgraphics
+call @mainloop
 
-
-.data
-graphics:%GRAPHICS
+;.data
+;graphics:%GRAPHICS

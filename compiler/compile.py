@@ -3,6 +3,8 @@ FILE_GAME = "game/game.uwu"
 FILE_GRAPHICS = "game/graphics.uwu"
 FILE_OPCODES_H = "emulator/include/opcodes.h"
 
+FILE_OUTPUT_ROM = "game/rom.owo"
+
 game:str = ""
 with open(FILE_GAME, 'r') as f:
 	game = f.read()
@@ -44,6 +46,7 @@ for e in withoperands.keys():
 game_lines:list[str] = game.split('\n')
 game_lines = [l.split(';')[0] for l in game_lines]
 game_lines = [l for l in game_lines if len(l)>0]
+game_lines = [l.lower() for l in game_lines]
 
 macros:dict[str, str] = {}
 for i in range(len(game_lines)):
@@ -62,6 +65,8 @@ print(macros)
 labels:dict[str, int] = {}
 labeluses:dict[str, list[int]] = {}
 datasectors:dict[str, list[int]] = {}	#like #graphics or #hw
+datastart_line = 0
+datastart_index = 0
 
 code:list[int] = []
 
@@ -70,8 +75,16 @@ index = 0
 for i in range(len(game_lines)):
 	l = game_lines[i]
 	op = l.split(' ')[0]
+
+	# if(op.startswith(".data")):
+		# while (i<len(game_lines) and (not (op:=(l:=game_lines[i]).split(' ')).startswith(".")):
+		
+
 	if not (op in opcodes.keys()):
 		if(op.startswith('.')): labels[op[1:]] = index
+		if(op.startswith('.data')):
+			datastart_line = i
+			datastart_index = index
 		print(f"Couldn't match opcode for lines {i} : {l}")
 		continue
 	
@@ -102,6 +115,8 @@ for i in range(len(game_lines)):
 			n = 0x00
 			if operand.startswith("$"):
 				n = int(operand[1:], 16) & (~0b1100_0000_0000_0000)
+			elif operand.startswith("%"):
+				n = int(operand[1:], 10) & (~0b1100_0000_0000_0000)
 			
 			if(withoperands[op] == 2):
 				code.append(n&0xFF)
@@ -112,10 +127,33 @@ for i in range(len(game_lines)):
 		index += withoperands[op]
 
 
+# index = datastart_index
+# for i in range(datastart_line+1, len(game_lines)):
+# 	l = game_lines[i]
+# 	if(l.startswith(".")): break
+# 	sector = l.split(':')[0]
+# 	if(sector in datasectors.keys()):
+# 		for i in datasectors[sector]:
+# 			code[i] = index&0xFF
+# 			code[i+1] = (index&(~0b1100_0000_0000_0000))>>8
+#
+	
+
+
+
 for k in labeluses:
 	for i in labeluses[k]:
-		code[i] = labels[k]&0xFF
-		code[i+1] = (labels[k]&(~0b1100_0000_0000_0000))>>8
+		code[i] = (labels[k] + 0x2000)&0xFF
+		code[i+1] = ((labels[k] + 0x2000)&(~0b1100_0000_0000_0000))>>8
 
 
 print(code)
+
+
+
+
+with open(FILE_OUTPUT_ROM, 'wb') as f:
+	b = b""
+	for e in code:
+		b += e.to_bytes(1, 'little')
+	f.write(b)

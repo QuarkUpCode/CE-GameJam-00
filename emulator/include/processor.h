@@ -30,6 +30,8 @@ typedef struct{
 	register_size_t* bg0;
 	register_size_t* bg1;
 
+	register_size_t controller;
+
 } MemoryMap;
 
 typedef struct {
@@ -51,15 +53,22 @@ typedef enum {
 	OP_SUB,
 	OP_MUL,
 	OP_MOD,
-
+	OP_AND,
+	OP_XOR,
+	OP_OR, 
+	OP_NOT,
 
 } Operation;
 
+
+register_size_t* fetch(Processor* p, address_t a);
+
 void swapXY(Processor* p);
+void swapXA(Processor* p);
 void arithmetic(Processor* p, Operation o);	//always uses A in place and X as operand (A = A + X, A = A - X, ...)
 
 //Uses D register as address
-register_t load(Processor* p);
+void read(Processor* p);
 void write(Processor* p);
 
 //for D register

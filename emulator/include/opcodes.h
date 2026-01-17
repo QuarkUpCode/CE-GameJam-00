@@ -28,6 +28,10 @@ typedef enum {
 	OC_SUB,		// a -= x
 	OC_MUL,		// a *= x
 	OC_MOD,		// a %= x
+	OC_AND,		// a &= x
+	OC_XOR,		// a ^= x
+	OC_OR,		// a |= x
+	OC_NOT,		// a != a
 
 } OpCode;
 
