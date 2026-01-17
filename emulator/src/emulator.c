@@ -1,3 +1,5 @@
+#include "config.h"
+
 #include <stdint.h>
 #include <stdlib.h>
 
@@ -9,6 +11,13 @@
 #include "quarklib/qprint/qprint.h"
 #include <stdio.h>
 
+#include <SDL2/SDL.h>
+#include <initsdl.h>
+#include "sdlmanager.h"
+
+// SDL_Window* window;
+// uint32_t framestart;
+// uint32_t frametime;
 
 void step(Processor* p){
 
@@ -178,40 +187,63 @@ uint8_t sample_texture(Processor* p, int index, int x, int y){
 	uint8_t* texture = &(p->mmap.chr[index*(TILESIZE*TILESIZE)]);
 	uint8_t c = texture[(y*TILESIZE) + x];
 	// return p->mmap.col[]
+	qdebug("c = %d\n", c);
 	return c;
+	// return 0;
 }
 
 void render(Processor* p){
-	
+	qlog("RENDER START\n");
 	int spritecount = p->mmap.spritecount;
 	Sprite s;
+	uint8_t* color;
 	for(int i=0; i<spritecount; i++){
 		s.x = p->mmap.sprite_data[(sizeof(Sprite)*i) + 0];
 		s.y = p->mmap.sprite_data[(sizeof(Sprite)*i) + 1];
 		s.n = p->mmap.sprite_data[(sizeof(Sprite)*i) + 2];
 		s.c = p->mmap.sprite_data[(sizeof(Sprite)*i) + 3];
+		qvald(s.c);
+		qvald(s.n);
 		for(int dy=0; dy<TILESIZE; dy++){						//whoever is reading this i am so so sorry
 			for(int dx=0; dx<TILESIZE; dx++){
 				if((2*s.x)+dx < 0 || (TILESIZE*TILEMAP_X) <= (2*s.x)+dx || (2*s.y)+dy < 0 || (TILESIZE*TILEMAP_Y) <= (2*s.y)+dy) continue;
-				p->mmap.screen[(((2*s.y)+dy)*TILEMAP_Y*TILESIZE) + (2*s.x) + dx] = p->mmap.col[PALETTE_SIZE*s.c + sample_texture(p, s.n, dx, dy)];
+				color = &(p->mmap.col[PALETTE_SIZE*s.c + sample_texture(p, s.n, dx, dy)]);
+				// p->mmap.screen[(((2*s.y)+dy)*TILEMAP_Y*TILESIZE) + (2*s.x) + dx] = (color[3]<<24) | (color[0]<<16) | (color[1]<<8) | color[2];
+				p->mmap.screen[(((2*s.y)+dy)*TILEMAP_X*TILESIZE) + (2*s.x) + dx] = 0xffFF44FF;
 			}
 		}
 	
 	}
+	qlog("RENDER END\n");
+
+	for(int y=0; y<HEIGHT; y++){
+		for(int x=0; x<WIDTH; x++){
+			// ((uint32_t*)SDL_GetWindowSurface(p->sdl.window)->pixels)[(y*WIDTH) + x] = 0xFFFFFF00; //ARGB
+			((uint32_t*)SDL_GetWindowSurface(p->sdl.window)->pixels)[(y*WIDTH) + x] = p->mmap.screen[((y*WIDTH/(SCALEFACTOR*SCALEFACTOR)) * TILEMAP_X*TILESIZE) + (x/SCALEFACTOR)];
+		}
+	}
+
+	m_endFrame(p->sdl.window, &p->sdl.framestart, &p->sdl.frametime);	
 }
 
-void emulate(const char* rom_path){
-	uint8_t* rom = loadfile(rom_path);
-	uint8_t* screen = malloc((TILEMAP_X*TILESIZE*TILEMAP_Y*TILESIZE)*sizeof(uint8_t)*3);
+void emulate(const char* rom_path, const char* graphics_path){
+
+	uint8_t* rom = (uint8_t*)loadfile(rom_path);
+	uint8_t* graphics_rom = (uint8_t*)loadfile(graphics_path);
+	uint32_t* screen = malloc((TILEMAP_X*TILESIZE*TILEMAP_Y*TILESIZE)*sizeof(uint32_t));
 
 	Processor processor = {0, 0, 0, 0, 0, 0, (MemoryMap){0, 0, 0, 0, 0, 0, 0, 0, 0, 0}};
+
+	// processor.sdl.window = initSDL("silly emulator");
+	processor.sdl.window = initSDL(WINDOWNAME);
+
 	processor.mmap.ram = malloc(0x1EFF * sizeof(uint8_t));
 	processor.mmap.rom = rom;
 
-	processor.mmap.chr = NULL;
+	processor.mmap.chr = &(graphics_rom[PALETTE_SIZE*PALETTE_COUNT*sizeof(uint32_t)]);
 	processor.mmap.bg0 = NULL;
 	processor.mmap.bg1 = NULL;
-	processor.mmap.col = NULL;
+	processor.mmap.col = graphics_rom;
 	processor.mmap.sprite_data = malloc(sizeof(Sprite) * MAX_SPRITE);
 
 	processor.mmap.controller = 0b00100000;
@@ -222,8 +254,11 @@ void emulate(const char* rom_path){
 	processor.pc = 0x2000;
 	int i = 0;
 	int j = 0;
-	while(j<(1+2)){
-	// while(1){
+	// while(j<(1+2)){
+	uint8_t quit = 0;
+	uint8_t* keyboardstate;
+	while(!quit){
+		quit = m_handleInput(&keyboardstate);
 		printf("pc : %x\n", processor.pc);
 		step(&processor);
 		printram(&processor);

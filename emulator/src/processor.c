@@ -16,6 +16,7 @@ register_size_t* fetch(Processor* p, address_t a){
 		switch(a){
 			case 0x1FF0:
 				render(p);
+				return &(p->x);
 				break;
 			case 0x1FFE:
 				return &(p->mmap.spritecount);

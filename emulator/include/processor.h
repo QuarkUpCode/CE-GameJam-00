@@ -17,6 +17,7 @@ typedef uint16_t address_t;
 //prefer incd rather than like idk save, read, swapxa, inc, swapxy, store, restore
 #define MAX_SPRITE 4
 #define PALETTE_SIZE 4
+#define PALETTE_COUNT 4
 typedef struct {
 
 	register_size_t x;	// aaaa bbb, A indicates tile, B indicates subtile 2px displacement (or simply placed at 2px * x)
@@ -34,7 +35,7 @@ typedef struct{
 	/* should have a dedicated PPU section if i have time */
 
 	register_size_t* chr;	//where sprite data will go
-	uint32_t* col;	//where the 6 color palettes will go
+	uint8_t* col;	//where the ~~6~~ 4!(notfactorial, just emphasis) color palettes will go
 	register_size_t* bg0;
 	register_size_t* bg1;
 	register_size_t* sprite_data;
@@ -42,9 +43,15 @@ typedef struct{
 	register_size_t controller;
 	register_size_t spritecount;
 	
-	uint8_t* screen;	//really this and some other stuff shouldn't be in there because absolutely not CPU related
+	uint32_t* screen;	//really this and some other stuff shouldn't be in there because absolutely not CPU related
 
 } MemoryMap;
+
+struct sdl_tmp{
+	void* window;
+	uint32_t framestart;
+	uint32_t frametime;
+};
 
 typedef struct {
 
@@ -56,6 +63,7 @@ typedef struct {
 	address_t d;	//address register, all read/write use the value here as address
 
 	MemoryMap mmap;
+	struct sdl_tmp sdl;
 
 } Processor;
 

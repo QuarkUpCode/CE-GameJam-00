@@ -1,6 +1,7 @@
 #!/bin/zsh
 
 cd emulator/
+make clean
 make
 cd ..
 

@@ -9,6 +9,6 @@ int main(int argc, char** argv){
 	// qprint("a");
 	// char* a = "test\n";
 	// write(1, a, 2);
-	emulate("./game/rom.owo");
+	emulate("./game/rom.owo", "./game/graphics.owo");
 }
 
