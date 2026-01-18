@@ -3,7 +3,8 @@
 #include "quarklib/qprint/qprint.h"
 
 
-register_size_t* fetch(Processor* p, address_t a){
+register_size_t* fetch(Emulator* e, address_t a){
+	Processor* p = &(e->p);
 	if(a < 0x1F00){
 		return &(p->mmap.ram[a]);
 	}
@@ -21,7 +22,7 @@ register_size_t* fetch(Processor* p, address_t a){
 				// return &(((register_size_t*)&(p->mmap.bg_addr))[1]);
 				return &(p->mmap.bg_addr_high);
 			case 0x1FF0:
-				render(p);
+				render(e);
 				return &(p->x);
 				break;
 			case 0x1FFE:

@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+#include "emulator.h"
 #include "processor.h"
 #include "opcodes.h"
 
@@ -15,12 +16,9 @@
 #include <initsdl.h>
 #include "sdlmanager.h"
 
-// SDL_Window* window;
-// uint32_t framestart;
-// uint32_t frametime;
 
-void step(Processor* p){
-
+void step(Emulator* e){
+	Processor* p = &(e->p);
 	OpCode instruction = *fetch(p, p->pc);
 	address_t a;
 	register_size_t operand;
@@ -192,19 +190,27 @@ uint8_t sample_texture(Processor* p, int index, int x, int y){
 	// return 0;
 }
 
-void render(Processor* p){
+void render(Emulator* e){
+	Processor* p = &(e->p);
+
 	qlog("RENDER START\n");
 	int spritecount = p->mmap.spritecount;
 	Sprite s;
 	uint8_t* color;
 	register_size_t bg_pal = 2;
+
+	/*
+		Reseting Screen
+	*/
 	for(int y=0; y<TILEMAP_Y*TILESIZE; y++){
 		for(int x=0; x<TILEMAP_X*TILESIZE; x++){
 			p->mmap.screen[(y*TILEMAP_X*TILESIZE) + x] = 0xFF000000;
 		}
 	}
 
-	
+	/*
+		Loading Background Tiles
+	*/
 	restore(p, 0x1FFC);
 	qlog("p->d in render is %x\n", p->d);
 	for(int y=0; y<TILEMAP_Y; y++){
@@ -221,8 +227,9 @@ void render(Processor* p){
 	}
 
 
-
-
+	/*
+		Loading Sprites
+	*/
 	for(int i=0; i<spritecount; i++){
 		s.x = p->mmap.sprite_data[(sizeof(Sprite)*i) + 0];
 		s.y = p->mmap.sprite_data[(sizeof(Sprite)*i) + 1];
@@ -248,11 +255,11 @@ void render(Processor* p){
 	for(int y=0; y<HEIGHT; y++){
 		for(int x=0; x<WIDTH; x++){
 			// ((uint32_t*)SDL_GetWindowSurface(p->sdl.window)->pixels)[(y*WIDTH) + x] = 0xFFFFFF00; //ARGB
-			((uint32_t*)SDL_GetWindowSurface(p->sdl.window)->pixels)[(y*WIDTH) + x] = p->mmap.screen[((y/SCALEFACTOR) * TILEMAP_X * TILESIZE) + (x/SCALEFACTOR)];
+			((uint32_t*)SDL_GetWindowSurface(e->window)->pixels)[(y*WIDTH) + x] = p->mmap.screen[((y/SCALEFACTOR) * TILEMAP_X * TILESIZE) + (x/SCALEFACTOR)];
 		}
 	}
 
-	m_endFrame(p->sdl.window, &p->sdl.framestart, &p->sdl.frametime);
+	m_endFrame(e->window, &e->framestart, &e->frametime);
 	char* keyboardstate;
 	m_handleInput(&keyboardstate);
 		if(m_getkey(keyboardstate, 'w')) p->mmap.controller |= 0x40;
@@ -265,36 +272,38 @@ void render(Processor* p){
 }
 
 void emulate(const char* rom_path, const char* graphics_path){
+	
+	Emulator emulator;
 
 	uint8_t* rom = (uint8_t*)loadfile(rom_path);
 	uint8_t* graphics_rom = (uint8_t*)loadfile(graphics_path);
 	uint32_t* screen = malloc((TILEMAP_X*TILESIZE*TILEMAP_Y*TILESIZE)*sizeof(uint32_t));
 
-	Processor processor = {0, 0, 0, 0, 0, 0, (MemoryMap){0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}};
+	// Processor processor = {0, 0, 0, 0, 0, 0, (MemoryMap){0, 0, 0, 0, 0, 0, 0, 0, 0, 0}};
 	
-	processor.sp = 0x1EFF;
-	// processor.sdl.window = initSDL("silly emulator");
-	processor.sdl.window = initSDL(WINDOWNAME);
+	emulator.p.sp = 0x1EFF;
+	// emulator.p.sdl.window = initSDL("silly emulator");
+	emulator.window = initSDL(WINDOWNAME);
 
-	processor.mmap.ram = malloc(0x1EFF * sizeof(uint8_t));
-	for(int i=0; i<0x1EFF; i++) processor.mmap.ram[i] = 0x00;
-	processor.mmap.rom = rom;
+	emulator.p.mmap.ram = malloc(0x1EFF * sizeof(uint8_t));
+	for(int i=0; i<0x1EFF; i++) emulator.p.mmap.ram[i] = 0x00;
+	emulator.p.mmap.rom = rom;
 
-	processor.mmap.chr = &(graphics_rom[PALETTE_SIZE*PALETTE_COUNT*sizeof(uint32_t)]);
-	processor.mmap.bg_addr_low = 0x0000;
-	processor.mmap.bg_addr_high = 0x0000;
-	processor.mmap.bg0 = NULL;
-	// processor.mmap.bg1 = NULL;
-	processor.mmap.col = graphics_rom;
-	processor.mmap.sprite_data = malloc(sizeof(Sprite) * MAX_SPRITE);
-	for(int i=0; i<MAX_SPRITE*sizeof(Sprite); i++) processor.mmap.sprite_data[i] = 0x00;
+	emulator.p.mmap.chr = &(graphics_rom[PALETTE_SIZE*PALETTE_COUNT*sizeof(uint32_t)]);
+	emulator.p.mmap.bg_addr_low = 0x0000;
+	emulator.p.mmap.bg_addr_high = 0x0000;
+	// emulator.p.mmap.bg0 = NULL;
+	// emulator.p.mmap.bg1 = NULL;
+	emulator.p.mmap.col = graphics_rom;
+	emulator.p.mmap.sprite_data = malloc(sizeof(Sprite) * MAX_SPRITE);
+	for(int i=0; i<MAX_SPRITE*sizeof(Sprite); i++) emulator.p.mmap.sprite_data[i] = 0x00;
 
-	processor.mmap.controller = 0b00000000;
-	processor.mmap.spritecount = 0;
+	emulator.p.mmap.controller = 0b00000000;
+	emulator.p.mmap.spritecount = 0;
 
-	processor.mmap.screen = screen;
+	emulator.p.mmap.screen = screen;
 	
-	processor.pc = 0x2000;
+	emulator.p.pc = 0x2000;
 	int i = 0;
 	int j = 0;
 	// while(j<(1+2)){
@@ -302,9 +311,9 @@ void emulate(const char* rom_path, const char* graphics_path){
 	uint8_t* keyboardstate;
 	while(!quit){
 		quit = m_handleInput(&keyboardstate);	//!!! all o this shouldn't be in here, i absolutely have to refactor this shit
-		processor.mmap.controller = 0x00;
-		// if(m_getkey(keyboardstate, 'w')) processor.mmap.controller |= 0x40;
-		// if(m_getkey(keyboardstate, 's')) processor.mmap.controller |= 0x20;
+		emulator.p.mmap.controller = 0x00;
+		// if(m_getkey(keyboardstate, 'w')) emulator.p.mmap.controller |= 0x40;
+		// if(m_getkey(keyboardstate, 's')) emulator.p.mmap.controller |= 0x20;
 		// if(m_getkey(keyboardstate, 'a')) processor.mmap.controller |= 0x10;
 		// if(m_getkey(keyboardstate, 'd')) processor.mmap.controller |= 0x08;
 		// if(m_getkey(keyboardstate, 'e')) processor.mmap.controller |= 0x04;
@@ -312,14 +321,14 @@ void emulate(const char* rom_path, const char* graphics_path){
 		// qprint("controller : %x\n", processor.mmap.controller);
 		// printf("pc : %x\n", processor.pc);
 		// printf("a  : %x\n", processor.a);
-		step(&processor);
+		step(&emulator);
 		// printram(&processor);
 		i++;
 		// if(i>=64) break;
-		if(processor.pc == 0x2003){
-			qlog("i = %d\n", i);
-			j++;
-		}
+		// if(processor.pc == 0x2003){
+		// 	qlog("i = %d\n", i);
+		// 	j++;
+		// }
 	}
 }
 

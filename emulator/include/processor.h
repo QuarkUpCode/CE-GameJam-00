@@ -1,6 +1,7 @@
 #ifndef PROCESSOR_H
 #define PROCESSOR_H
 
+#include "emulator.h"
 #include <stdint.h>
 #include <sys/types.h>
 
@@ -29,31 +30,24 @@ typedef struct {
 
 typedef struct{
 
-	register_size_t* ram;	//holds stack from $6942 to $68C2 (no that cant happen with 14 but address :despair:)
+	register_size_t* ram;
 	register_size_t* rom;
 
 	/* should have a dedicated PPU section if i have time */
 
-	register_size_t* chr;	//where sprite data will go
-	uint8_t* col;	//where the ~~6~~ 4!(notfactorial, just emphasis) color palettes will go
+	register_size_t* chr;	//sprite data
+	uint8_t* col;	//color palettes
 	register_size_t bg_addr_low;
 	register_size_t bg_addr_high;
-	register_size_t* bg0;
-	// register_size_t* bg1;
 	register_size_t* sprite_data;
 
-	register_size_t controller;
 	register_size_t spritecount;
+	register_size_t controller;
 	
 	uint32_t* screen;	//really this and some other stuff shouldn't be in there because absolutely not CPU related
 
 } MemoryMap;
 
-struct sdl_tmp{
-	void* window;
-	uint32_t framestart;
-	uint32_t frametime;
-};
 
 typedef struct {
 
@@ -65,7 +59,6 @@ typedef struct {
 	address_t d;	//address register, all read/write use the value here as address
 
 	MemoryMap mmap;
-	struct sdl_tmp sdl;
 
 } Processor;
 
@@ -83,7 +76,7 @@ typedef enum {
 } Operation;
 
 
-register_size_t* fetch(Processor* p, address_t a);
+register_size_t* fetch(Emulator* e, address_t a);
 
 void swapXY(Processor* p);
 void swapXA(Processor* p);

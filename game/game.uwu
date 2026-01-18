@@ -112,6 +112,14 @@ save tmp;
 dec;
 call @loop_resetbackground;
 
+restore tmp;
+decd;
+ldx $04;
+write;
+ldd background_ram;
+ldx $05;
+write;
+
 ret;
 
 
