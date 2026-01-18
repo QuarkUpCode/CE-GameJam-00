@@ -1,6 +1,7 @@
 ;macro SPC_CHR_DATA $1F00
 ;macro SPC_SPRITE_DATA $1F02
 macro SPC_FORCE_RENDER $1FF0
+macro SPC_BACKGROUND_ADDR $1FFC
 macro SPC_SPRITE_COUNT $1FFE
 macro CONTROLLER $1FFF
 
@@ -12,6 +13,7 @@ macro BT_RIGHT $08
 macro BT_A $04
 macro BT_B $02
 macro BT_START $01
+macro BACKGROUND_TILE_COUNT %32
 
 
 macro tmp $0000
@@ -20,10 +22,13 @@ macro robot_x $0002;	address
 macro robot_y $0003;	address
 macro pointer_x $0004;	address
 macro pointer_y $0005;	address
-;macro MAX_X $07;		value
-macro MAX_X $04;		value
-;macro MAX_Y $03;		value
-macro MAX_Y $02;		value
+macro MAX_X $07;		value, inclusive
+;macro MAX_X $04;		value
+macro MAX_Y $03;		value, inclusive
+;macro MAX_Y $02;		value
+
+macro background_ram $0100;	address
+macro bg_default $0c;
 
 macro sprite_count $2;
 
@@ -39,6 +44,8 @@ macro sprite_robot $1004;
 ;ldd pointer_x;
 ;ldx 3;
 ;write;
+
+call @loadbackground
 call @mainloop
 
 
@@ -60,6 +67,55 @@ call @mainloop
 ;
 ;ret;
 
+
+
+;;;;;;;;;;;;;;;;;;;;
+; RESET BACKGROUND ;
+;;;;;;;;;;;;;;;;;;;;
+.resetbackground
+
+; -- setting A to WIDTH*HEIGHT --
+;ldx MAX_X;
+;swapXA;
+;ldx MAX_Y;
+;mul;
+;ldx $0;
+;swapxa;
+
+ldx BACKGROUND_TILE_COUNT
+swapxa;
+
+ldd background_ram;
+save tmp;
+;ldx bg_default;
+call @loop_resetbackground;		!!! THIS DOES NOT WORK BC CALL MODIFIES D, SO WHEN I DO INCD AND WRITE IT FUCKS UP <- update i used save and restore lol like that's litteraly why i implemented that
+.loop_resetbackground
+pop;	carefull, this fucks up x i think
+pop;
+leap %14;
+
+restore tmp;
+ldx bg_default;
+write;
+incd;
+save tmp;
+
+dec;
+call @loop_resetbackground;
+
+ret;
+
+
+;;;;;;;;;;;;;;;;;;;
+; LOAD BACKGROUND ;
+;;;;;;;;;;;;;;;;;;;
+.loadbackground
+
+call @resetbackground
+ldd background_ram;
+save SPC_BACKGROUND_ADDR;
+
+ret;
 
 ;;;;;;;;;;;;;;;
 ; MOVE CURSOR ;

@@ -197,11 +197,32 @@ void render(Processor* p){
 	int spritecount = p->mmap.spritecount;
 	Sprite s;
 	uint8_t* color;
+	register_size_t bg_pal = 2;
 	for(int y=0; y<TILEMAP_Y*TILESIZE; y++){
 		for(int x=0; x<TILEMAP_X*TILESIZE; x++){
 			p->mmap.screen[(y*TILEMAP_X*TILESIZE) + x] = 0xFF000000;
 		}
 	}
+
+	
+	restore(p, 0x1FFC);
+	qlog("p->d in render is %x\n", p->d);
+	for(int y=0; y<TILEMAP_Y; y++){
+		for(int x=0; x<TILEMAP_X; x++){
+			for(int dy=0; dy<TILESIZE; dy++){
+				for(int dx=0; dx<TILESIZE; dx++){
+					color = &(p->mmap.col[(PALETTE_SIZE*bg_pal*4) + (sample_texture(p, *fetch(p, p->d), dx, dy)*4)]);
+
+					p->mmap.screen[((y*TILESIZE + dy)*TILEMAP_X*TILESIZE) + x*TILESIZE + dx] = (0xFF <<24) | (color[0]<<16) | (color[1]<<8) | color[2];;
+				}
+			}
+			p->d++;
+		}
+	}
+
+
+
+
 	for(int i=0; i<spritecount; i++){
 		s.x = p->mmap.sprite_data[(sizeof(Sprite)*i) + 0];
 		s.y = p->mmap.sprite_data[(sizeof(Sprite)*i) + 1];
@@ -231,7 +252,8 @@ void render(Processor* p){
 		}
 	}
 
-	m_endFrame(p->sdl.window, &p->sdl.framestart, &p->sdl.frametime);	
+	m_endFrame(p->sdl.window, &p->sdl.framestart, &p->sdl.frametime);
+	// while(1);
 }
 
 void emulate(const char* rom_path, const char* graphics_path){
@@ -240,7 +262,7 @@ void emulate(const char* rom_path, const char* graphics_path){
 	uint8_t* graphics_rom = (uint8_t*)loadfile(graphics_path);
 	uint32_t* screen = malloc((TILEMAP_X*TILESIZE*TILEMAP_Y*TILESIZE)*sizeof(uint32_t));
 
-	Processor processor = {0, 0, 0, 0, 0, 0, (MemoryMap){0, 0, 0, 0, 0, 0, 0, 0, 0, 0}};
+	Processor processor = {0, 0, 0, 0, 0, 0, (MemoryMap){0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}};
 
 	// processor.sdl.window = initSDL("silly emulator");
 	processor.sdl.window = initSDL(WINDOWNAME);
@@ -250,8 +272,10 @@ void emulate(const char* rom_path, const char* graphics_path){
 	processor.mmap.rom = rom;
 
 	processor.mmap.chr = &(graphics_rom[PALETTE_SIZE*PALETTE_COUNT*sizeof(uint32_t)]);
+	processor.mmap.bg_addr_low = 0x0000;
+	processor.mmap.bg_addr_high = 0x0000;
 	processor.mmap.bg0 = NULL;
-	processor.mmap.bg1 = NULL;
+	// processor.mmap.bg1 = NULL;
 	processor.mmap.col = graphics_rom;
 	processor.mmap.sprite_data = malloc(sizeof(Sprite) * MAX_SPRITE);
 	for(int i=0; i<MAX_SPRITE*sizeof(Sprite); i++) processor.mmap.sprite_data[i] = 0x00;
@@ -274,10 +298,11 @@ void emulate(const char* rom_path, const char* graphics_path){
 		if(m_getkey(keyboardstate, 's')) processor.mmap.controller |= 0x20;
 		if(m_getkey(keyboardstate, 'a')) processor.mmap.controller |= 0x10;
 		if(m_getkey(keyboardstate, 'd')) processor.mmap.controller |= 0x08;
-		qprint("controller : %x\n", processor.mmap.controller);
-		printf("pc : %x\n", processor.pc);
+		// qprint("controller : %x\n", processor.mmap.controller);
+		// printf("pc : %x\n", processor.pc);
+		// printf("a  : %x\n", processor.a);
 		step(&processor);
-		printram(&processor);
+		// printram(&processor);
 		i++;
 		// if(i>=64) break;
 		if(processor.pc == 0x2003){

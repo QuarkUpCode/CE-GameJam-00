@@ -36,8 +36,10 @@ typedef struct{
 
 	register_size_t* chr;	//where sprite data will go
 	uint8_t* col;	//where the ~~6~~ 4!(notfactorial, just emphasis) color palettes will go
+	register_size_t bg_addr_low;
+	register_size_t bg_addr_high;
 	register_size_t* bg0;
-	register_size_t* bg1;
+	// register_size_t* bg1;
 	register_size_t* sprite_data;
 
 	register_size_t controller;

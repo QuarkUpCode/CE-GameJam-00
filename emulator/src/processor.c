@@ -14,6 +14,12 @@ register_size_t* fetch(Processor* p, address_t a){
 			return &(p->mmap.sprite_data[a-0x1F80]);
 		}
 		switch(a){
+			case 0x1FFC:
+				// return &(((register_size_t*)&(p->mmap.bg_addr))[0]);
+				return &(p->mmap.bg_addr_low);
+			case 0x1FFD:
+				// return &(((register_size_t*)&(p->mmap.bg_addr))[1]);
+				return &(p->mmap.bg_addr_high);
 			case 0x1FF0:
 				render(p);
 				return &(p->x);
@@ -90,6 +96,7 @@ void readm(Processor* p){
 }
 void writem(Processor* p){
 	*fetch(p, p->d) = p->x;
+	qdebug("wrote %x at %x\n", p->x, p->d);
 }
 
 //for D register
