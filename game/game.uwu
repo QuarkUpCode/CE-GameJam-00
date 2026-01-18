@@ -28,6 +28,8 @@ macro MAX_Y $03;		value, inclusive
 ;macro MAX_Y $02;		value
 
 macro current_level $0006;
+macro robot_direction $0007;
+macro robot_current_tile $0008;
 
 macro background_ram $0100;	address
 macro bg_default $0c;
@@ -133,6 +135,14 @@ ret;
 ;;;;;;;;;;;;;;
 .loadlevel_0
 
+ldx $00;
+ldd robot_x;
+write;
+ldd robot_y;
+write;
+ldd robot_direction;
+write;
+
 ldx $08;
 ldd background_ram;
 ;could also like save to tmp then ldd tmp, swapxa, ldx %5, add, swapxa, write, restore tmp
@@ -189,6 +199,7 @@ ret;
 ;;;;;;;;;;;;;;
 .loadlevel
 
+call @loadspritedata
 call @resetbackground;
 
 ldx current_level;
@@ -203,7 +214,7 @@ ldx current_level;
 swapxa;
 ldx %1;
 sub;
-leap4;
+leap %4;
 call @loadlevel_1
 ret;
 
@@ -248,7 +259,7 @@ call @loop_rotatetile;
 restore tmp;
 read;
 swapxa;
-ldx $0c; 0b1100
+ldx $0c; 0b1110
 and;
 ldx $08; 0b1000
 sub;
@@ -259,7 +270,7 @@ restore tmp;
 read;
 swapxa;
 inc;
-ldx $04;
+ldx $02;
 mod;
 ldx $08;
 add;
@@ -267,6 +278,210 @@ swapxa;
 write;
 
 ret;
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;
+; UTIL FETCH ROBOT TILE ;
+;;;;;;;;;;;;;;;;;;;;;;;;;
+.utilfetchrobottile
+
+; -- background tile index the pointer is pointing at (i really should rename it "cursor" instead cos eh)
+ldx MAX_X;
+swapXA;
+inc;
+ldd robot_y;
+read;
+mul;
+ldd robot_x;
+read;
+add;
+;dec;
+
+ldd background_ram;
+save tmp;
+call @loop_robottile;
+.loop_robottile
+pop;
+pop;
+leap %11;
+restore tmp;
+incd;
+save tmp;
+
+dec;
+call @loop_robottile;
+
+restore tmp;
+read;
+ldd robot_current_tile;
+write;
+ret;
+
+
+;;;;;;;;;;;;;;;;;;;;;
+; UTIL ROTATE ROBOT ;
+;;;;;;;;;;;;;;;;;;;;;
+.utilrotaterobot
+
+call @utilfetchrobottile;
+
+ldd robot_current_tile;
+read;
+swapxa;
+ldx $0e;	0b1110
+and;
+ldx $08;	0b1000
+sub;
+not;
+leap %1;
+ret;
+
+
+ldd robot_current_tile;
+read;
+swapXA;
+ldx $01;
+and;
+; case tile != 0
+leap %11;
+ldx $03;
+swapxa;
+ldd robot_direction;
+read;
+sub; newdir = 3 - olddir
+swapxa;
+write;
+ret;
+
+;case tile ==0
+ldd robot_direction;
+read;
+swapxa;
+ldx $01;
+xor;		//00 -> 01, 01-> 00, 10->11, 11->10
+write
+ret;
+
+
+;;;;;;;;;;;;;;;;;
+; EXECUTE ROBOT ;
+;;;;;;;;;;;;;;;;;
+.executerobot
+;call @utilfetchrobottile;
+
+call @utilrotaterobot;
+
+ldd robot_direction;
+read;
+dupexy;
+
+swapxy;
+dupexy;
+swapxa;
+ldx $00;
+sub;
+not;
+; -- if direction == 0 DOWN
+leap %27; {
+
+ldd robot_y;
+read;
+swapxa;
+ldx MAX_Y;
+sub;
+; if y != max_Y
+leap %10;	{
+ldd robot_y
+read;
+swapxa;
+inc;
+swapxa;
+write;
+leap %7;	}
+call @loadlevel
+call @mainloop
+ret; }
+
+
+swapxy;
+dupexy;
+swapxa;
+ldx $01;
+sub;
+not;
+; -- if direction == 1 RIGHT
+leap %27; {
+
+ldd robot_x;
+read;
+swapxa;
+ldx MAX_X;
+sub;
+; if x != max_X
+leap %10;	{
+ldd robot_x
+read;
+swapxa;
+inc;
+swapxa;
+write;
+leap %7;	}
+call @loadlevel
+call @mainloop
+ret; }
+
+
+swapxy;
+dupexy;
+swapxa;
+ldx $02;
+sub;
+not;
+; -- if direction == 2 UP
+leap %19; {
+
+ldd robot_y;
+read;
+swapxa;
+; -- if y != 0
+leap %5; {
+dec;
+swapxa;
+write;
+leap %7; }{
+call @loadlevel;
+call @mainloop
+ret; }
+
+
+swapxy;
+dupexy;
+swapxa;
+ldx $03;
+sub;
+not;
+; -- if direction == 3 LEFT
+leap %19; {
+
+ldd robot_x;
+read;
+swapxa;
+; -- if x != 0
+leap %5; {
+dec;
+swapxa;
+write;
+leap %7; }{
+call @loadlevel;
+call @mainloop;
+ret; }
+
+ret;
+
+
+
+
 
 
 ;;;;;;;;;;;;;;;
@@ -365,6 +580,25 @@ and;
 leap %3;
 call @rotatetile;
 
+; -- B ==
+ldd CONTROLLER;
+read;
+swapXA;
+ldx BT_B;
+and;
+;leap %18;
+;call @loop_runrobot;
+;.loop_runrobot
+;pop;
+;pop;
+;call @executerobot
+;call @loadspritedata
+;ldd SPC_FORCE_RENDER;
+;read;
+;call @loop_runrobot
+leap %6;
+call @executerobot
+call @loadspritedata;
 
 ret;
 

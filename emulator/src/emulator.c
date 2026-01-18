@@ -253,6 +253,14 @@ void render(Processor* p){
 	}
 
 	m_endFrame(p->sdl.window, &p->sdl.framestart, &p->sdl.frametime);
+	char* keyboardstate;
+	m_handleInput(&keyboardstate);
+		if(m_getkey(keyboardstate, 'w')) p->mmap.controller |= 0x40;
+		if(m_getkey(keyboardstate, 's')) p->mmap.controller |= 0x20;
+		if(m_getkey(keyboardstate, 'a')) p->mmap.controller |= 0x10;
+		if(m_getkey(keyboardstate, 'd')) p->mmap.controller |= 0x08;
+		if(m_getkey(keyboardstate, 'e')) p->mmap.controller |= 0x04;
+		if(m_getkey(keyboardstate, 'f')) p->mmap.controller |= 0x02;
 	// while(1);
 }
 
@@ -294,11 +302,12 @@ void emulate(const char* rom_path, const char* graphics_path){
 	while(!quit){
 		quit = m_handleInput(&keyboardstate);	//!!! all o this shouldn't be in here, i absolutely have to refactor this shit
 		processor.mmap.controller = 0x00;
-		if(m_getkey(keyboardstate, 'w')) processor.mmap.controller |= 0x40;
-		if(m_getkey(keyboardstate, 's')) processor.mmap.controller |= 0x20;
-		if(m_getkey(keyboardstate, 'a')) processor.mmap.controller |= 0x10;
-		if(m_getkey(keyboardstate, 'd')) processor.mmap.controller |= 0x08;
-		if(m_getkey(keyboardstate, 'e')) processor.mmap.controller |= 0x04;
+		// if(m_getkey(keyboardstate, 'w')) processor.mmap.controller |= 0x40;
+		// if(m_getkey(keyboardstate, 's')) processor.mmap.controller |= 0x20;
+		// if(m_getkey(keyboardstate, 'a')) processor.mmap.controller |= 0x10;
+		// if(m_getkey(keyboardstate, 'd')) processor.mmap.controller |= 0x08;
+		// if(m_getkey(keyboardstate, 'e')) processor.mmap.controller |= 0x04;
+		// if(m_getkey(keyboardstate, 'f')) processor.mmap.controller |= 0x02;
 		// qprint("controller : %x\n", processor.mmap.controller);
 		// printf("pc : %x\n", processor.pc);
 		// printf("a  : %x\n", processor.a);

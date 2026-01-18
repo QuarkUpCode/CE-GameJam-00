@@ -10,7 +10,7 @@
 #define WIDTH (TILEMAP_X*TILESIZE*SCALEFACTOR)
 #define HEIGHT (TILEMAP_Y*TILESIZE*SCALEFACTOR)
 
-#define FPS (30)
+#define FPS (05)
 #define WINDOWNAME "sillyemulator"
 
 #endif
