@@ -60,7 +60,7 @@ typedef struct {
 	register_size_t x;	//main register
 	register_size_t y;
 	register_size_t a;	//accumulator
-	register_size_t sp;	//stack pointer
+	address_t sp;	//stack pointer
 	address_t pc;	//program counter
 	address_t d;	//address register, all read/write use the value here as address
 

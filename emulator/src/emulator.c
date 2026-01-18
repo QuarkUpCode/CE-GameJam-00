@@ -271,7 +271,8 @@ void emulate(const char* rom_path, const char* graphics_path){
 	uint32_t* screen = malloc((TILEMAP_X*TILESIZE*TILEMAP_Y*TILESIZE)*sizeof(uint32_t));
 
 	Processor processor = {0, 0, 0, 0, 0, 0, (MemoryMap){0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}};
-
+	
+	processor.sp = 0x1EFF;
 	// processor.sdl.window = initSDL("silly emulator");
 	processor.sdl.window = initSDL(WINDOWNAME);
 

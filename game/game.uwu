@@ -367,7 +367,7 @@ ret;
 ;;;;;;;;;;;;;;;;;
 ; EXECUTE ROBOT ;
 ;;;;;;;;;;;;;;;;;
-.executerobot
+.aexecuterobot
 
 call @utilrotaterobot
 ldd robot_direction;
@@ -403,7 +403,7 @@ ret;
 ;;;;;;;;;;;;;;;;;
 ; NOT EXECUTE ROBOT ;
 ;;;;;;;;;;;;;;;;;
-.notexecuterobot
+.executerobot
 ;call @utilfetchrobottile;
 
 call @utilrotaterobot;
