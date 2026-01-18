@@ -29,14 +29,34 @@ ROM : $2000 -> 3FFFF
 `$1FFF | R_` : Accesses the controller's button status `U D L R A B S`  
 
 # Instructions
-|Instruction|OpCode|Length|Effect|
-|--|--|--|--|
-| `NOP` | 0 | 1 |  |
-| `READ` | 1 | 1 | `x = mem[d]` |
-| `WRITE` | 2 | 1 | `mem[d] = x` |
-| `SAVE` | 3 | 3 | writes in little endian `d` at `mem[operand]` |
-| `RESTORE` | 4 | 3 | restores `d` to the little endian value at `mem[operand]` |
-| `INCD` | 5 | 1 | `d++` |
-| `DECD` | 6 | 1 | `d--` |
-| `LDD` | 7 | 3 | `d = operand` |
+|Instruction|OpCode|Length|Effect|Note|
+|--|--|--|--|--|
+| `NOP` | 0 | 1 |  |  |
+| `READ` | 1 | 1 | `x = mem[d]` |  |
+| `WRITE` | 2 | 1 | `mem[d] = x` |  |
+| `SAVE` | 3 | 3 | writes in little endian `d` at `mem[operand]` |  |
+| `RESTORE` | 4 | 3 | restores `d` to the little endian value at `mem[operand]` |  |
+| `INCD` | 5 | 1 | `d++` |  |
+| `DECD` | 6 | 1 | `d--` |  |
+| `LDD` | 7 | 3 | `d = operand` |  |
+| `INC` | 8 | 1 | `a++` |  |
+| `DEC` | 9 | 1 | `a--` |  |
+| `LDX` | 10 | 2 | `x = operand` |  |
+| `SWAPXY` | 11 | 1 | `x <-> y` |  |
+| `DUPEXY` | 11 | 1 | `y = x` |  |
+| `SWAPXA` | 11 | 1 | `x <-> a` |  |
+| `DUPEXA` | 11 | 1 | `a = x` |  |
+| `PUSH` | 11 | 1 | pushes `x` on stack |  |
+| `POP` | 11 | 1 | pops from stack into `x` |  |
+| `LEAP` | 11 | 2 | `pc = pc + operand` | `operand` is in bytes, not in instructions (ex: `LDD` counts as 3, not 1) |
+| `CALL` | 11 | 3 | pushes `pc` onto the stack (little endian), then `pc = operand` | `d` is not preserved accross calls |
+| `RET` | 11 | 1 | `pc = pop()` (little endian) |  |
 
+| `ADD` | 11 | 1 | `a += x` |  |
+| `SUB` | 11 | 1 | `a -= x` |  |
+| `MUL` | 11 | 1 | `a *= x` |  |
+| `MOD` | 11 | 1 | `a %= x` |  |
+| `AND` | 11 | 1 | `a &= x` |  |
+| `XOR` | 11 | 1 | `a ^= x` |  |
+| `OR` | 11 | 1 | `a |= x` |  |
+| `NOT` | 11 | 1 | `a = !a` | /!\ not bitwise |
