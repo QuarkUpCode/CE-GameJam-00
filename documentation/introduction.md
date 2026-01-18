@@ -43,20 +43,19 @@ ROM : $2000 -> 3FFFF
 | `DEC` | 9 | 1 | `a--` |  |
 | `LDX` | 10 | 2 | `x = operand` |  |
 | `SWAPXY` | 11 | 1 | `x <-> y` |  |
-| `DUPEXY` | 11 | 1 | `y = x` |  |
-| `SWAPXA` | 11 | 1 | `x <-> a` |  |
-| `DUPEXA` | 11 | 1 | `a = x` |  |
-| `PUSH` | 11 | 1 | pushes `x` on stack |  |
-| `POP` | 11 | 1 | pops from stack into `x` |  |
-| `LEAP` | 11 | 2 | `pc = pc + operand` | `operand` is in bytes, not in instructions (ex: `LDD` counts as 3, not 1) |
-| `CALL` | 11 | 3 | pushes `pc` onto the stack (little endian), then `pc = operand` | `d` is not preserved accross calls |
-| `RET` | 11 | 1 | `pc = pop()` (little endian) |  |
-
-| `ADD` | 11 | 1 | `a += x` |  |
-| `SUB` | 11 | 1 | `a -= x` |  |
-| `MUL` | 11 | 1 | `a *= x` |  |
-| `MOD` | 11 | 1 | `a %= x` |  |
-| `AND` | 11 | 1 | `a &= x` |  |
-| `XOR` | 11 | 1 | `a ^= x` |  |
-| `OR` | 11 | 1 | `a |= x` |  |
-| `NOT` | 11 | 1 | `a = !a` | /!\ not bitwise |
+| `DUPEXY` | 12 | 1 | `y = x` |  |
+| `SWAPXA` | 13 | 1 | `x <-> a` |  |
+| `DUPEXA` | 14 | 1 | `a = x` |  |
+| `PUSH` | 15 | 1 | pushes `x` on stack |  |
+| `POP` | 16 | 1 | pops from stack into `x` |  |
+| `LEAP` | 17 | 2 | `pc = pc + operand` | `operand` is in bytes, not in instructions (ex: `LDD` counts as 3, not 1) |
+| `CALL` | 18 | 3 | pushes `pc` onto the stack (little endian), then `pc = operand` | `d` is not preserved accross calls |
+| `RET` | 19 | 1 | `pc = pop()` (little endian) |  |
+| `ADD` | 20 | 1 | `a += x` |  |
+| `SUB` | 21 | 1 | `a -= x` |  |
+| `MUL` | 22 | 1 | `a *= x` |  |
+| `MOD` | 23 | 1 | `a %= x` |  |
+| `AND` | 24 | 1 | `a &= x` |  |
+| `XOR` | 25 | 1 | `a ^= x` |  |
+| `OR` | 26 | 1 | `a \|= x` |  |
+| `NOT` | 27 | 1 | `a = !a` | /!\ not bitwise |
