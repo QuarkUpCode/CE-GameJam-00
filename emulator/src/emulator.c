@@ -187,7 +187,7 @@ uint8_t sample_texture(Processor* p, int index, int x, int y){
 	uint8_t* texture = &(p->mmap.chr[index*(TILESIZE*TILESIZE)]);
 	uint8_t c = texture[(y*TILESIZE) + x];
 	// return p->mmap.col[]
-	qdebug("c = %d\n", c);
+	// qdebug("c = %d\n", c);
 	return c;
 	// return 0;
 }
@@ -214,9 +214,10 @@ void render(Processor* p){
 		for(int dy=0; dy<TILESIZE; dy++){						//whoever is reading this i am so so sorry
 			for(int dx=0; dx<TILESIZE; dx++){
 				if((2*s.x)+dx < 0 || (TILESIZE*TILEMAP_X) <= (2*s.x)+dx || (2*s.y)+dy < 0 || (TILESIZE*TILEMAP_Y) <= (2*s.y)+dy) continue;
-				color = &(p->mmap.col[PALETTE_SIZE*s.c + sample_texture(p, s.n, dx, dy)]);
-				// p->mmap.screen[(((2*s.y)+dy)*TILEMAP_Y*TILESIZE) + (2*s.x) + dx] = (color[3]<<24) | (color[0]<<16) | (color[1]<<8) | color[2];
-				p->mmap.screen[(((2*s.y)+dy)*TILEMAP_X*TILESIZE) + (2*s.x) + dx] = 0xffFF44FF;
+				color = &(p->mmap.col[(PALETTE_SIZE*s.c*4) + (sample_texture(p, s.n, dx, dy)*4)]);
+				if(color[3] != 0) p->mmap.screen[(((2*s.y)+dy)*TILEMAP_X*TILESIZE) + (2*s.x) + dx] = (color[3]<<24) | (color[0]<<16) | (color[1]<<8) | color[2];
+				// p->mmap.screen[(((2*s.y)+dy)*TILEMAP_X*TILESIZE) + (2*s.x) + dx] = 0xffFF44FF;
+				// p->mmap.screen[(((2*s.y)+dy)*TILEMAP_X*TILESIZE) + (2*s.x) + dx] |= 0xff0000F0;
 			}
 		}
 	

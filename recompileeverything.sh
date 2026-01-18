@@ -1,5 +1,7 @@
 #!/bin/zsh
 
+python3 compiler/graphics.py
+
 cd emulator/
 make clean
 make
