@@ -39,7 +39,11 @@ macro sprite_pointer $1F80
 ;macro sprite_pointer $0008;
 macro texture_pointer $00;
 macro palette_pointer $00;
-macro sprite_robot $1004;
+;macro sprite_robot $1004;
+
+macro sprite_robot $1F84;
+macro texture_robot $07
+macro palette_robot $00
 
 
 .init
@@ -370,6 +374,7 @@ ret;
 ;;;;;;;;;;;;;;;;;;
 .loadspritedata
 
+;; --- POINTER ---
 ; -- load x and y position in X and Y registers --
 ldd pointer_x
 read;
@@ -406,6 +411,47 @@ ldx texture_pointer;
 write;
 incd;
 ldx palette_pointer;
+write;
+
+
+
+;; --- ROBOT ---
+; -- load x and y position in X and Y registers --
+ldd robot_x
+read;
+swapXY;
+ldd robot_y;
+read;
+ldd sprite_robot;
+swapXY;
+
+; -- convert to format (<<3)
+swapXA;
+ldx $08;
+mul;
+swapXA;
+
+swapXY;
+
+swapXA;
+ldx $08;
+mul;
+swapXA;
+
+swapXY;
+
+; -- write it to sprite_pointer (x, y)
+write;
+incd;
+swapXY;
+write;
+
+; -- write texture and palette
+incd;
+ldx texture_robot;
+write;
+incd;
+ldx palette_robot;
 write;
 
 
