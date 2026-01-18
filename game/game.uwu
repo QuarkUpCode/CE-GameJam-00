@@ -368,6 +368,42 @@ ret;
 ; EXECUTE ROBOT ;
 ;;;;;;;;;;;;;;;;;
 .executerobot
+
+call @utilrotaterobot
+ldd robot_direction;
+read;
+swapxa;
+not
+leap %9;
+ldd robot_y;
+read;
+swapxa;
+inc;
+swapxa;
+write;
+ret;
+
+ldd robot_x;
+read;
+swapxa;
+inc;
+swapxa;
+write;
+ret;
+
+ret;
+
+
+
+
+
+
+
+
+;;;;;;;;;;;;;;;;;
+; NOT EXECUTE ROBOT ;
+;;;;;;;;;;;;;;;;;
+.notexecuterobot
 ;call @utilfetchrobottile;
 
 call @utilrotaterobot;
@@ -586,19 +622,19 @@ read;
 swapXA;
 ldx BT_B;
 and;
-;leap %18;
-;call @loop_runrobot;
-;.loop_runrobot
-;pop;
-;pop;
-;call @executerobot
-;call @loadspritedata
-;ldd SPC_FORCE_RENDER;
-;read;
-;call @loop_runrobot
-leap %6;
+leap %18;
+call @loop_runrobot;
+.loop_runrobot
+pop;
+pop;
 call @executerobot
-call @loadspritedata;
+call @loadspritedata
+ldd SPC_FORCE_RENDER;
+read;
+call @loop_runrobot
+;leap %6;
+;call @executerobot
+;call @loadspritedata;
 
 ret;
 
