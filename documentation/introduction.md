@@ -25,6 +25,7 @@ ROM : $2000 -> 3FFFF
 ## Special Addresses
 `$1F80 - $1F8F | RW` : Place in which to store Sprite information (x, y, texture_index, color_palette)  
 `$1FF0 | R_` : Force the console to render the game, which then waits a minimum of 1/5 seconds  
+`$1FFC - $1FFD` : Place in which to `SAVE $1FFC` the address at which Background TileMap data can be found
 `$1FFE | RW` : Place to store the number of sprites that need to be rendered  
 `$1FFF | R_` : Accesses the controller's button status `U D L R A B S`  
 

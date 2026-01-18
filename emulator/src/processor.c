@@ -96,7 +96,6 @@ void readm(Processor* p){
 }
 void writem(Processor* p){
 	*fetch(p, p->d) = p->x;
-	qdebug("wrote %x at %x\n", p->x, p->d);
 }
 
 //for D register
