@@ -81,7 +81,7 @@ void arithmetic(Processor* p, Operation o){
 		default:
 			qerror("WOOOW THATS NOT A VALID `Operation` %d\n", o);
 	}
-	p->a = p->a&0x3F;
+	p->a = p->a&0x7F;
 	qlog("a is now %x\n", p->a);
 }
 
