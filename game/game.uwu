@@ -27,6 +27,8 @@ macro MAX_X $07;		value, inclusive
 macro MAX_Y $03;		value, inclusive
 ;macro MAX_Y $02;		value
 
+macro current_level $0006;
+
 macro background_ram $0100;	address
 macro bg_default $0c;
 
@@ -46,6 +48,7 @@ macro sprite_robot $1004;
 ;write;
 
 call @loadbackground
+call @loadlevel
 call @mainloop
 
 
@@ -116,6 +119,151 @@ ldd background_ram;
 save SPC_BACKGROUND_ADDR;
 
 ret;
+
+
+
+;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;
+;;  LEVELS  ;;
+;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;
+.loadlevel_0
+
+ldx $08;
+ldd background_ram;
+;could also like save to tmp then ldd tmp, swapxa, ldx %5, add, swapxa, write, restore tmp
+incd;
+incd;
+incd;
+incd;
+write;
+incd;
+incd;
+write;
+incd;
+incd;
+write;
+incd;
+incd;
+incd;
+incd;
+incd;
+write;
+incd;
+incd;
+incd;
+write;
+incd;
+incd;
+incd;
+incd;
+write;
+incd;
+incd;
+incd;
+incd;
+write;
+incd;
+incd;
+incd;
+incd;
+incd;
+write;
+incd;
+write
+incd;
+
+ret;
+
+
+.loadlevel_1
+
+
+
+;;;;;;;;;;;;;;
+; LOAD LEVEL ;
+;;;;;;;;;;;;;;
+.loadlevel
+
+call @resetbackground;
+
+ldx current_level;
+swapxa;
+ldx %0;
+sub;
+leap 4;
+call @loadlevel_0
+ret;
+
+ldx current_level;
+swapxa;
+ldx %1;
+sub;
+leap4;
+call @loadlevel_1
+ret;
+
+
+ret;
+
+
+
+
+
+;;;;;;;;;;;;;;;
+; ROTATE TILE ;
+;;;;;;;;;;;;;;;
+.rotatetile
+
+; -- background tile index the pointer is pointing at (i really should rename it "cursor" instead cos eh)
+ldx MAX_X;
+swapXA;
+inc;
+ldd pointer_y;
+read;
+mul;
+ldd pointer_x;
+read;
+add;
+;dec;
+
+ldd background_ram;
+save tmp;
+call @loop_rotatetile;
+.loop_rotatetile
+pop;
+pop;
+leap %11;
+restore tmp;
+incd;
+save tmp;
+
+dec;
+call @loop_rotatetile;
+
+restore tmp;
+read;
+swapxa;
+ldx $0c; 0b1100
+and;
+ldx $08; 0b1000
+sub;
+leap %1;
+ret;
+
+restore tmp;
+read;
+swapxa;
+inc;
+ldx $04;
+mod;
+ldx $08;
+add;
+swapxa;
+write;
+
+ret;
+
 
 ;;;;;;;;;;;;;;;
 ; MOVE CURSOR ;
@@ -201,6 +349,17 @@ swapXA;
 inc;
 swapXA;
 write;
+
+
+
+; -- A ==
+ldd CONTROLLER;
+read;
+swapXA;
+ldx BT_A;
+and;
+leap %3;
+call @rotatetile;
 
 
 ret;

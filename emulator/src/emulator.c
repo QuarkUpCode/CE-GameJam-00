@@ -298,6 +298,7 @@ void emulate(const char* rom_path, const char* graphics_path){
 		if(m_getkey(keyboardstate, 's')) processor.mmap.controller |= 0x20;
 		if(m_getkey(keyboardstate, 'a')) processor.mmap.controller |= 0x10;
 		if(m_getkey(keyboardstate, 'd')) processor.mmap.controller |= 0x08;
+		if(m_getkey(keyboardstate, 'e')) processor.mmap.controller |= 0x04;
 		// qprint("controller : %x\n", processor.mmap.controller);
 		// printf("pc : %x\n", processor.pc);
 		// printf("a  : %x\n", processor.a);
